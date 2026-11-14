@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kantianism — An Interactive Primer</title>
+  <style>
+:root {
+  --bg: #f6f4ef;
+  --ink: #22252b;
+  --accent: #4a3f8f;
+  --accent-soft: #e6e1f5;
+  --card: #ffffff;
+  --border: #d9d4c8;
+  --good: #2e7d32;
+  --bad: #b3261e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+header {
+  background: var(--accent);
+  color: #fff;
+  padding: 1.5rem 1rem 1rem;
+  text-align: center;
+}
+
+header h1 { margin: 0; font-size: 2.2rem; letter-spacing: 0.04em; }
+.tagline { margin: 0.25rem 0 1rem; opacity: 0.85; font-style: italic; }
+
+.tabs { display: flex; gap: 0.5rem; justify-content: center; }
+.tab {
+  font: inherit;
+  padding: 0.4rem 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: #fff;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.tab.active { background: #fff; color: var(--accent); font-weight: bold; }
+
+.progress { margin-top: 1rem; font-size: 0.9rem; }
+.progress-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  margin-top: 0.3rem;
+  overflow: hidden;
+}
+#progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #ffd54f;
+  transition: width 0.3s ease;
+}
+
+main { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+.view { display: none; }
+.view.active { display: block; }
+.hidden { display: none !important; }
+
+.lesson-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.lesson-card:hover { border-color: var(--accent); }
+.lesson-card h3 { margin: 0; }
+.lesson-card .badge {
+  font-size: 0.8rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.lesson-card.read .badge { background: #dcedc8; color: var(--good); }
+
+#lesson-detail h2 { margin-top: 0.5rem; }
+#lesson-body p { margin: 0 0 1rem; }
+
+button.primary, .link-btn {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 0.55rem 1.2rem;
+  border: none;
+}
+button.primary { background: var(--accent); color: #fff; }
+button.primary:disabled { opacity: 0.5; cursor: default; }
+.link-btn { background: none; color: var(--accent); padding: 0; margin-bottom: 0.5rem; }
+
+.flashcard { perspective: 1000px; max-width: 480px; margin: 1rem auto; }
+.flashcard-inner {
+  position: relative;
+  min-height: 220px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+  cursor: pointer;
+}
+.flashcard-inner.flipped { transform: rotateY(180deg); }
+.flashcard-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+.flashcard-face.back { transform: rotateY(180deg); background: var(--accent-soft); }
+.flashcard-face p { margin: 0; font-size: 1.15rem; }
+.flashcard-face .hint { margin-top: 0.8rem; font-size: 0.8rem; opacity: 0.6; font-style: italic; }
+
+.card-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+.card-controls button {
+  font: inherit;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--accent);
+  background: #fff;
+  color: var(--accent);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#quiz-options { display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0; }
+.quiz-option {
+  font: inherit;
+  text-align: left;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  cursor: pointer;
+}
+.quiz-option:hover:not(:disabled) { border-color: var(--accent); }
+.quiz-option.correct { border-color: var(--good); background: #e8f5e9; }
+.quiz-option.wrong { border-color: var(--bad); background: #fdecea; }
+.quiz-option:disabled { cursor: default; }
+
+#quiz-feedback { padding: 0.8rem 1rem; border-radius: 8px; background: var(--accent-soft); }
+#quiz-feedback.good { background: #e8f5e9; }
+#quiz-feedback.bad { background: #fdecea; }
+
+#quiz-score { font-size: 2rem; font-weight: bold; margin: 0.5rem 0; }
+
+footer {
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.7;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+</style>
+</head>
+<body>
+  <header>
+    <h1>Kantianism</h1>
+    <p class="tagline">An interactive primer on Immanuel Kant's philosophy</p>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-view="lessons" role="tab">Lessons</button>
+      <button class="tab" data-view="flashcards" role="tab">Flashcards</button>
+      <button class="tab" data-view="quiz" role="tab">Quiz</button>
+    </nav>
+    <div class="progress" aria-label="Lessons completed">
+      <span id="progress-label">0 / 6 lessons read</span>
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-lessons" class="view active">
+      <div id="lesson-list"></div>
+      <article id="lesson-detail" class="hidden">
+        <button id="back-to-list" class="link-btn">&larr; All lessons</button>
+        <h2 id="lesson-title"></h2>
+        <div id="lesson-body"></div>
+        <button id="mark-read" class="primary">Mark as read</button>
+      </article>
+    </section>
+
+    <section id="view-flashcards" class="view">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner" id="flashcard-inner">
+          <div class="flashcard-face front"><p id="card-term"></p><span class="hint">click to reveal</span></div>
+          <div class="flashcard-face back"><p id="card-def"></p></div>
+        </div>
+      </div>
+      <div class="card-controls">
+        <button id="prev-card">&larr; Prev</button>
+        <span id="card-counter"></span>
+        <button id="next-card">Next &rarr;</button>
+      </div>
+    </section>
+
+    <section id="view-quiz" class="view">
+      <div id="quiz-start">
+        <p id="quiz-intro">Test yourself on Kant's ethics and metaphysics.</p>
+        <button id="start-quiz" class="primary">Start quiz</button>
+      </div>
+      <div id="quiz-run" class="hidden">
+        <p id="quiz-progress"></p>
+        <h2 id="quiz-question"></h2>
+        <div id="quiz-options"></div>
+        <p id="quiz-feedback" class="hidden"></p>
+        <button id="quiz-next" class="primary hidden">Next</button>
+      </div>
+      <div id="quiz-result" class="hidden">
+        <h2>Your score</h2>
+        <p id="quiz-score"></p>
+        <p id="quiz-message"></p>
+        <button id="restart-quiz" class="primary">Try again</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built on the Critique of Pure Reason (1781) and the Groundwork of the Metaphysics of Morals (1785).</p>
+  </footer>
+
+  <script>
+const KANT_DATA = {
+  lessons: [
+    {
+      id: "copernican-turn",
+      title: "Kant and the Copernican Turn",
+      body: [
+        "Immanuel Kant (1724–1804) argued that the mind is not a passive receiver of experience: it actively structures it. Just as Copernicus showed the Earth is not the center of the cosmos, Kant proposed that objects of knowledge must conform to the structure of our cognition, not the other way around.",
+        "This 'Copernican turn' is the starting point of his critical philosophy, developed in the Critique of Pure Reason (1781).",
+      ],
+    },
+    {
+      id: "synthetic-a-priori",
+      title: "Synthetic a priori Knowledge",
+      body: [
+        "Kant divided judgments into analytic (the predicate is contained in the subject, e.g. 'all bachelors are unmarried') and synthetic (the predicate adds something new, e.g. 'all bodies have weight').",
+        "He also distinguished a priori (independent of experience) from a posteriori (grounded in experience). His big claim: much of our knowledge — especially in mathematics and physics — is both synthetic and a priori, like '7 + 5 = 12'.",
+        "The Critique asks: how is synthetic a priori knowledge possible? Answer: because the mind imposes its own forms (space, time) and categories (causality, substance) on experience.",
+      ],
+    },
+    {
+      id: "phenomena-noumena",
+      title: "Phenomena and Noumena",
+      body: [
+        "Phenomena are things as they appear to us, structured by our forms of intuition and categories of understanding. Noumena are things as they are in themselves, independent of any possible experience.",
+        "For Kant we can know phenomena but never noumena: every attempt to know the thing-in-itself applies categories that only work within experience. Ideas like God, the soul, and the world-as-a-whole are 'ideas of reason' — they cannot be known, only thought.",
+      ],
+    },
+    {
+      id: "duty-and-moral-worth",
+      title: "Duty, Inclination, and Moral Worth",
+      body: [
+        "Kant's ethics is deontological: the moral worth of an action depends on the maxim (principle) behind it and whether it is done from duty, not on its consequences.",
+        "An action done from inclination — even if it produces good results — has no moral worth. Only actions done from respect for the moral law count. As Kant puts it: moral worth lies in the fact that the action is done from duty, not from any expected outcome.",
+      ],
+    },
+    {
+      id: "categorical-imperative",
+      title: "The Categorical Imperative",
+      body: [
+        "The categorical imperative is Kant's supreme principle of morality: act only according to that maxim by which you can at the same time will that it become a universal law.",
+        "Its most famous formulation (the Formula of Humanity): act so that you treat humanity, whether in your own person or in that of another, always at the same time as an end, never merely as a means.",
+        "Other formulations include the Formula of Universal Law, the Formula of Autonomy (act as if your maxim were legislating for the kingdom of ends), and the Formula of the Kingdom of Ends.",
+      ],
+    },
+    {
+      id: "autonomy-kingdom-of-ends",
+      title: "Autonomy and the Kingdom of Ends",
+      body: [
+        "Autonomy — self-legislation — is for Kant the ground of human dignity. A rational being gives the moral law to itself; it is not ruled by external forces or inclinations. Heteronomy (rule by something else) is the opposite.",
+        "The kingdom of ends is the imagined community of all rational beings, each legislating universal laws and treating every rational being as an end in itself. Morality, for Kant, is membership in this ideal kingdom.",
+      ],
+    },
+  ],
+
+  flashcards: [
+    { term: "Categorical imperative", def: "Kant's supreme moral principle: act only on maxims you can will as universal law." },
+    { term: "Maxim", def: "The subjective principle of willing — the rule an agent actually acts on." },
+    { term: "Deontology", def: "Ethics based on duty and rules, not consequences; Kant's approach." },
+    { term: "Synthetic a priori", def: "Knowledge that adds new information yet is independent of experience (e.g. '7 + 5 = 12')." },
+    { term: "Analytic judgment", def: "A judgment whose predicate is contained in the subject ('all bachelors are unmarried')." },
+    { term: "Phenomena", def: "Things as they appear to us, structured by space, time, and the categories." },
+    { term: "Noumenon", def: "A thing as it is in itself, beyond possible experience — unknowable for Kant." },
+    { term: "Autonomy", def: "Self-legislation: giving the moral law to oneself, the basis of dignity." },
+    { term: "Heteronomy", def: "Being ruled by something external to reason, e.g. inclination or authority." },
+    { term: "Kingdom of ends", def: "The ideal community of rational beings who treat each other always as ends, never merely as means." },
+    { term: "Moral worth", def: "For Kant, possessed only by actions done from duty, not from inclination or for reward." },
+    { term: "Formula of Humanity", def: "Treat humanity always at the same time as an end, never merely as a means." },
+  ],
+
+  quiz: [
+    {
+      q: "According to Kant, what makes an action morally worthy?",
+      options: [
+        "Its good consequences",
+        "That it is done from duty",
+        "That it follows social custom",
+        "That it brings happiness",
+      ],
+      answer: 1,
+      explain: "Only actions done from duty — out of respect for the moral law — have moral worth. Consequences and inclinations are morally irrelevant.",
+    },
+    {
+      q: "'7 + 5 = 12' is, for Kant, an example of:",
+      options: [
+        "An analytic a priori judgment",
+        "A synthetic a posteriori judgment",
+        "A synthetic a priori judgment",
+        "A synthetic a posteriori analytic judgment",
+      ],
+      answer: 2,
+      explain: "It adds new information (synthetic) yet is known independently of experience (a priori).",
+    },
+    {
+      q: "Why can we never know noumena, according to Kant?",
+      options: [
+        "Because our senses are too weak",
+        "Because the categories of understanding only apply within experience",
+        "Because noumena do not exist",
+        "Because God hides them from us",
+      ],
+      answer: 1,
+      explain: "Categories like causality are valid only for phenomena. Applying them to things-in-themselves is a misuse — a 'transcendental illusion'.",
+    },
+    {
+      q: "The Formula of Humanity says we must:",
+      options: [
+        "Always tell the truth",
+        "Treat humanity always as an end, never merely as a means",
+        "Obey the laws of the land",
+        "Maximize overall happiness",
+      ],
+      answer: 1,
+      explain: "Respect for rational nature forbids using persons merely as tools for your own purposes.",
+    },
+    {
+      q: "For Kant, autonomy means:",
+      options: [
+        "Doing whatever you want",
+        "Self-legislation — giving the moral law to yourself through reason",
+        "Living alone, apart from society",
+        "Rejecting all moral rules",
+      ],
+      answer: 1,
+      explain: "Autonomy is the ground of dignity: rational beings legislate the moral law for themselves, unlike heteronomy (rule by inclination or external authority).",
+    },
+    {
+      q: "Kant's 'Copernican turn' claims that:",
+      options: [
+        "The Earth revolves around the Sun",
+        "Objects of knowledge conform to the structure of our cognition",
+        "Morality is based on feelings",
+        "We can know things in themselves",
+      ],
+      answer: 1,
+      explain: "Just as Copernicus displaced the Earth from the center, Kant displaced the passive mind: the mind actively structures experience.",
+    },
+    {
+      q: "An action done from inclination but with good results has, for Kant:",
+      options: [
+        "Full moral worth",
+        "Some moral worth",
+        "No moral worth",
+        "Negative moral worth",
+      ],
+      answer: 2,
+      explain: "Moral worth requires acting from duty. Pleasant or useful actions done from inclination may be praiseworthy but are not morally worthy.",
+    },
+    {
+      q: "The kingdom of ends is:",
+      options: [
+        "A country ruled by a philosopher-king",
+        "The ideal community of rational beings legislating universal moral laws for each other",
+        "Heaven",
+        "The realm of phenomena",
+      ],
+      answer: 1,
+      explain: "In the kingdom of ends, every rational being is both legislator and subject of the moral law, and each is treated as an end in itself.",
+    },
+  ],
+};
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = KANT_DATA;
+}
+
+</script>
+  <script>
+(function () {
+  "use strict";
+
+  var data = KANT_DATA;
+  var STORAGE_KEY = "kantianism-progress-v1";
+
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      var parsed = raw ? JSON.parse(raw) : {};
+      return { read: parsed.read || [] };
+    } catch (e) {
+      return { read: [] };
+    }
+  }
+
+  function saveProgress(progress) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    } catch (e) {
+      /* storage unavailable; progress stays in memory */
+    }
+  }
+
+  var progress = loadProgress();
+
+  function $(id) {
+    return document.getElementById(id);
+  }
+
+  function showView(name) {
+    document.querySelectorAll(".tab").forEach(function (tab) {
+      tab.classList.toggle("active", tab.dataset.view === name);
+    });
+    document.querySelectorAll(".view").forEach(function (view) {
+      view.classList.toggle("active", view.id === "view-" + name);
+    });
+  }
+
+  function renderProgress() {
+    var total = data.lessons.length;
+    var done = progress.read.length;
+    $("progress-label").textContent = done + " / " + total + " lessons read";
+    $("progress-fill").style.width = total ? (done / total) * 100 + "%" : "0%";
+  }
+
+  /* ---------- Lessons ---------- */
+
+  function renderLessonList() {
+    var list = $("lesson-list");
+    list.innerHTML = "";
+    data.lessons.forEach(function (lesson, i) {
+      var card = document.createElement("div");
+      card.className = "lesson-card" + (progress.read.indexOf(lesson.id) !== -1 ? " read" : "");
+      var title = document.createElement("h3");
+      title.textContent = i + 1 + ". " + lesson.title;
+      var badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = progress.read.indexOf(lesson.id) !== -1 ? "Read" : "Unread";
+      card.appendChild(title);
+      card.appendChild(badge);
+      card.addEventListener("click", function () {
+        openLesson(lesson.id);
+      });
+      list.appendChild(card);
+    });
+  }
+
+  function openLesson(id) {
+    var lesson = data.lessons.find(function (l) { return l.id === id; });
+    if (!lesson) return;
+    $("lesson-list").classList.add("hidden");
+    $("lesson-detail").classList.remove("hidden");
+    $("lesson-title").textContent = lesson.title;
+    var body = $("lesson-body");
+    body.innerHTML = "";
+    lesson.body.forEach(function (para) {
+      var p = document.createElement("p");
+      p.textContent = para;
+      body.appendChild(p);
+    });
+    var btn = $("mark-read");
+    if (progress.read.indexOf(lesson.id) !== -1) {
+      btn.textContent = "Read ✓";
+      btn.disabled = true;
+    } else {
+      btn.textContent = "Mark as read";
+      btn.disabled = false;
+    }
+    btn.onclick = function () {
+      if (progress.read.indexOf(lesson.id) === -1) {
+        progress.read.push(lesson.id);
+        saveProgress(progress);
+        renderProgress();
+        renderLessonList();
+        btn.textContent = "Read ✓";
+        btn.disabled = true;
+        var badge = document.querySelectorAll(".lesson-card .badge");
+      }
+    };
+  }
+
+  function initLessons() {
+    $("back-to-list").addEventListener("click", function () {
+      $("lesson-detail").classList.add("hidden");
+      $("lesson-list").classList.remove("hidden");
+      renderLessonList();
+    });
+    renderLessonList();
+    renderProgress();
+  }
+
+  /* ---------- Flashcards ---------- */
+
+  var cardIndex = 0;
+
+  function renderCard() {
+    var card = data.flashcards[cardIndex];
+    $("card-term").textContent = card.term;
+    $("card-def").textContent = card.def;
+    $("card-counter").textContent = cardIndex + 1 + " / " + data.flashcards.length;
+    $("flashcard-inner").classList.remove("flipped");
+  }
+
+  function initFlashcards() {
+    $("flashcard").addEventListener("click", function () {
+      $("flashcard-inner").classList.toggle("flipped");
+    });
+    $("prev-card").addEventListener("click", function () {
+      cardIndex = (cardIndex - 1 + data.flashcards.length) % data.flashcards.length;
+      renderCard();
+    });
+    $("next-card").addEventListener("click", function () {
+      cardIndex = (cardIndex + 1) % data.flashcards.length;
+      renderCard();
+    });
+    renderCard();
+  }
+
+  /* ---------- Quiz ---------- */
+
+  var quizState = { index: 0, score: 0, answered: false };
+
+  function startQuiz() {
+    quizState = { index: 0, score: 0, answered: false };
+    $("quiz-start").classList.add("hidden");
+    $("quiz-result").classList.add("hidden");
+    $("quiz-run").classList.remove("hidden");
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    var item = data.quiz[quizState.index];
+    quizState.answered = false;
+    $("quiz-progress").textContent = "Question " + (quizState.index + 1) + " of " + data.quiz.length;
+    $("quiz-question").textContent = item.q;
+    $("quiz-feedback").classList.add("hidden");
+    $("quiz-next").classList.add("hidden");
+    var box = $("quiz-options");
+    box.innerHTML = "";
+    item.options.forEach(function (opt, i) {
+      var btn = document.createElement("button");
+      btn.className = "quiz-option";
+      btn.textContent = opt;
+      btn.addEventListener("click", function () {
+        answerQuestion(i, btn);
+      });
+      box.appendChild(btn);
+    });
+  }
+
+  function answerQuestion(i, btn) {
+    if (quizState.answered) return;
+    quizState.answered = true;
+    var item = data.quiz[quizState.index];
+    var buttons = document.querySelectorAll(".quiz-option");
+    buttons.forEach(function (b, idx) {
+      b.disabled = true;
+      if (idx === item.answer) b.classList.add("correct");
+    });
+    var feedback = $("quiz-feedback");
+    feedback.classList.remove("hidden");
+    if (i === item.answer) {
+      quizState.score += 1;
+      feedback.textContent = "Correct! " + item.explain;
+      feedback.className = "good";
+    } else {
+      btn.classList.add("wrong");
+      feedback.textContent = "Not quite. " + item.explain;
+      feedback.className = "bad";
+    }
+    $("quiz-next").classList.remove("hidden");
+  }
+
+  function nextQuestion() {
+    quizState.index += 1;
+    if (quizState.index >= data.quiz.length) {
+      showResult();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function showResult() {
+    $("quiz-run").classList.add("hidden");
+    $("quiz-result").classList.remove("hidden");
+    var total = data.quiz.length;
+    $("quiz-score").textContent = quizState.score + " / " + total;
+    var ratio = total ? quizState.score / total : 0;
+    var msg;
+    if (ratio === 1) msg = "Perfect — you think like a true Kantian.";
+    else if (ratio >= 0.7) msg = "Solid grasp of the essentials. Revisit the flashcards to sharpen it.";
+    else if (ratio >= 0.4) msg = "A decent start — reread the lessons on duty and the categorical imperative.";
+    else msg = "The moral law is subtle. Start again with the first lessons.";
+    $("quiz-message").textContent = msg;
+  }
+
+  function initQuiz() {
+    $("start-quiz").addEventListener("click", startQuiz);
+    $("quiz-next").addEventListener("click", nextQuestion);
+    $("restart-quiz").addEventListener("click", startQuiz);
+  }
+
+  /* ---------- Init ---------- */
+
+  document.querySelectorAll(".tab").forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      showView(tab.dataset.view);
+    });
+  });
+
+  initLessons();
+  initFlashcards();
+  initQuiz();
+})();
+
+</script>
+</body>
+</html>

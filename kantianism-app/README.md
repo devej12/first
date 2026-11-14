@@ -11,6 +11,11 @@ noumena, duty and moral worth, the categorical imperative, and autonomy.
 - **Flashcards** — twelve key terms with click-to-reveal definitions.
 - **Quiz** — eight multiple-choice questions with explanations and a final score.
 
+## Single-file version
+
+`standalone.html` bundles the whole app (markup, styles, data, logic) into one
+file with no external references — open it directly in any browser.
+
 ## Run it
 
 No build step. Serve the folder or just open `index.html` directly:
@@ -35,3 +40,4 @@ node test.js
 - `data.js` — lessons, flashcards, and quiz content (also loadable from Node)
 - `app.js` — UI logic (tabs, lessons, flashcards, quiz, progress)
 - `test.js` — content-integrity smoke test
+- `standalone.html` — the entire app inlined into a single file
