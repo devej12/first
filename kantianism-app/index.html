@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kantianism — An Interactive Primer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Kantianism</h1>
+    <p class="tagline">An interactive primer on Immanuel Kant's philosophy</p>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-view="lessons" role="tab">Lessons</button>
+      <button class="tab" data-view="flashcards" role="tab">Flashcards</button>
+      <button class="tab" data-view="quiz" role="tab">Quiz</button>
+    </nav>
+    <div class="progress" aria-label="Lessons completed">
+      <span id="progress-label">0 / 6 lessons read</span>
+      <div class="progress-bar"><div id="progress-fill"></div></div>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-lessons" class="view active">
+      <div id="lesson-list"></div>
+      <article id="lesson-detail" class="hidden">
+        <button id="back-to-list" class="link-btn">&larr; All lessons</button>
+        <h2 id="lesson-title"></h2>
+        <div id="lesson-body"></div>
+        <button id="mark-read" class="primary">Mark as read</button>
+      </article>
+    </section>
+
+    <section id="view-flashcards" class="view">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner" id="flashcard-inner">
+          <div class="flashcard-face front"><p id="card-term"></p><span class="hint">click to reveal</span></div>
+          <div class="flashcard-face back"><p id="card-def"></p></div>
+        </div>
+      </div>
+      <div class="card-controls">
+        <button id="prev-card">&larr; Prev</button>
+        <span id="card-counter"></span>
+        <button id="next-card">Next &rarr;</button>
+      </div>
+    </section>
+
+    <section id="view-quiz" class="view">
+      <div id="quiz-start">
+        <p id="quiz-intro">Test yourself on Kant's ethics and metaphysics.</p>
+        <button id="start-quiz" class="primary">Start quiz</button>
+      </div>
+      <div id="quiz-run" class="hidden">
+        <p id="quiz-progress"></p>
+        <h2 id="quiz-question"></h2>
+        <div id="quiz-options"></div>
+        <p id="quiz-feedback" class="hidden"></p>
+        <button id="quiz-next" class="primary hidden">Next</button>
+      </div>
+      <div id="quiz-result" class="hidden">
+        <h2>Your score</h2>
+        <p id="quiz-score"></p>
+        <p id="quiz-message"></p>
+        <button id="restart-quiz" class="primary">Try again</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built on the Critique of Pure Reason (1781) and the Groundwork of the Metaphysics of Morals (1785).</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
